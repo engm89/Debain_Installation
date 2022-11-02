@@ -9,11 +9,9 @@ fi
 echo -e "\nCopying config files ..."
 rm /etc/apt/sources.list
 rm /etc/nanorc
-rm /etc/vimrc
 if [[ -d configs ]]; then
   cp -ri configs/sources.list /etc/apt
   cp -ri configs/nanorc /etc/
-  cp -ri configs/vimrc /etc/
 else
   echo -e "\nDirectory not found."
 fi
