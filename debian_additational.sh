@@ -20,12 +20,50 @@ rm -f packages.microsoft.gpg
 echo -e "Update our Repos"
 apt update -y
 
-# Base Packages
+# Additional Packages
 echo -e "\nInstalling Additional Packages ..."
-if ! apt install -y  libreoffice firefox nvidia-driver code docker-ce docker-ce-cli containerd.io docker-compose-plugin vlc 
-
+if ! apt install -y  libreoffice firefox nvidia-driver code docker-ce docker-ce-cli containerd.io docker-compose-plugin vlc ttf-mscorefonts-installer libreoffice-gnome 
 then
     echo "Error while installing packages."
     exit
 fi
-echo -e "\nBase Packages installation completed"
+echo -e "\nAdditionalPackages installation completed"
+
+fc-cache -f
+
+# Enable Docker
+sudo systemctl enable docker.service
+groupadd docker
+usermod -aG docker $USER
+
+# Nvidia
+nvidia_check=$(/sbin/lspci | grep -i '.* vga .* nvidia .*')
+
+if [[ $nvidia_check == *' nvidia '* ]]; then
+  printf 'NVIDIA GPU is present:  %s\n' "$nvidia_check"
+  read -p "install the proprietary NVIDIA Drivers? (Yes/No) " choice
+	if [[ "$choice" =~ ^[Yy] ]]
+	then
+		echo "Okay, installing NVIDIA drivers."
+		sudo dnf install nvidia-driver -y
+	else
+		echo "Okay, Not installing NVIDIA drivers.
+		"
+	fi
+	else
+  	echo "NVIDIA GPU is not present."
+fi
+
+# Setup complete.  reboot system now or not
+read -p "Setup of this system is complete. Reboot is recommended. Would you like to do this now? " reboot_choice
+if [[ "$reboot_choice" =~ ^[Yy] ]]
+	then
+		echo "Rebooting in 5 seconds"
+		sleep 5
+		sudo reboot now
+	else
+		echo "Exiting Setup"
+		sleep 1
+fi
+
+exit
